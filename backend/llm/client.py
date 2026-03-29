@@ -5,6 +5,8 @@ HTTP client for the vLLM OpenAI-compatible inference server.
 import os
 from dataclasses import dataclass, field
 
+import httpx
+
 
 @dataclass
 class VLLMClient:
@@ -42,6 +44,16 @@ class VLLMClient:
 
         Raises:
             httpx.HTTPStatusError: If the server returns a non-2xx response.
-            NotImplementedError: Until this stub is filled in.
         """
-        raise NotImplementedError
+        payload: dict = {"model": self.model_name, "messages": messages}
+        if tools:
+            payload["tools"] = tools
+            payload["tool_choice"] = "auto"
+
+        response = httpx.post(
+            f"{self.base_url}/v1/chat/completions",
+            json=payload,
+            timeout=120.0,
+        )
+        response.raise_for_status()
+        return response.json()

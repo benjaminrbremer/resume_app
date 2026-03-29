@@ -36,6 +36,21 @@ class LoginResponse(BaseModel):
 # Experience
 # ---------------------------------------------------------------------------
 
+class ExperienceChatMessage(BaseModel):
+    role: str  # "user" | "assistant"
+    content: str
+
+
+class ExperienceChatRequest(BaseModel):
+    username: str  # temporary until session auth is implemented
+    message: str
+    history: list[ExperienceChatMessage] = []
+
+
+class ExperienceChatResponse(BaseModel):
+    reply: str
+
+
 class ExperienceCreate(BaseModel):
     type: str  # general | job_project | personal
     title: str
