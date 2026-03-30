@@ -1,29 +1,15 @@
-import asyncio
-
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
 import backend.db.crud.experience as crud
-from backend.routers.schemas import (
-    ExperienceCreate,
-    ExperienceChatRequest,
-    ExperienceUpdate,
+from backend.file_db.operations import (
+    delete_experience_file,
+    read_experience_file,
+    write_experience_file,
 )
+from backend.routers.schemas import ExperienceCreate, ExperienceUpdate
 
 router = APIRouter()
-
-
-@router.post("/chat")
-async def experience_chat(body: ExperienceChatRequest):
-    from backend.llm.agent import run_experience_agent
-
-    reply = await asyncio.to_thread(
-        run_experience_agent,
-        body.username,
-        body.message,
-        [m.model_dump() for m in body.history],
-    )
-    return JSONResponse(content={"reply": reply})
 
 
 @router.get("/")
@@ -41,6 +27,8 @@ async def create_experience(body: ExperienceCreate, username: str):
         start_date=body.start_date,
         end_date=body.end_date,
     )
+    if body.content is not None:
+        write_experience_file(username, record["id"], body.content)
     return JSONResponse(status_code=201, content=record)
 
 
@@ -49,7 +37,8 @@ async def get_experience(exp_id: str):
     record = crud.get_experience(exp_id)
     if not record:
         raise HTTPException(status_code=404, detail="Experience not found")
-    return JSONResponse(content=record)
+    content = read_experience_file(record["username"], exp_id)
+    return JSONResponse(content={**record, "content": content})
 
 
 @router.put("/{exp_id}")
@@ -57,12 +46,16 @@ async def update_experience(exp_id: str, body: ExperienceUpdate):
     record = crud.update_experience(exp_id, **body.model_dump(exclude_none=True))
     if not record:
         raise HTTPException(status_code=404, detail="Experience not found")
+    if body.content is not None:
+        write_experience_file(record["username"], exp_id, body.content)
     return JSONResponse(content=record)
 
 
 @router.delete("/{exp_id}")
 async def delete_experience(exp_id: str):
-    deleted = crud.delete_experience(exp_id)
-    if not deleted:
+    record = crud.get_experience(exp_id)
+    if not record:
         raise HTTPException(status_code=404, detail="Experience not found")
+    delete_experience_file(record["username"], exp_id)
+    crud.delete_experience(exp_id)
     return JSONResponse(content={"deleted": True})

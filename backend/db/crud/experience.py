@@ -2,7 +2,7 @@ import uuid
 
 from backend.db.connection import get_db_connection
 
-VALID_TYPES = ("general", "job_project", "personal")
+VALID_TYPES = ("general", "job", "project", "volunteer")
 
 
 def create_experience(
