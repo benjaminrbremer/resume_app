@@ -11,17 +11,16 @@ The agent is responsible for:
     5. Persisting the final assistant message to the DB.
 """
 
+import json
+
 from backend.llm.client import VLLMClient
 
-# Tool dispatch map — maps tool names to callables.
-# Populated here so the agent has a single place to register new tools.
-# All imports are deferred to avoid circular dependencies at module load time.
+# ---------------------------------------------------------------------------
+# Application agent — tool dispatch map
+# ---------------------------------------------------------------------------
+
 def _build_tool_registry() -> dict:
-    from backend.tools.experience import (
-        persist_experience,
-        search_experience,
-        update_experience_overview,
-    )
+    from backend.tools.experience import search_experience
     from backend.tools.documents import (
         export_pdf,
         generate_cover_letter,
@@ -30,8 +29,6 @@ def _build_tool_registry() -> dict:
     from backend.tools.research import research_url
 
     return {
-        "persist_experience": persist_experience,
-        "update_experience_overview": update_experience_overview,
         "search_experience": search_experience,
         "generate_resume": generate_resume,
         "generate_cover_letter": generate_cover_letter,

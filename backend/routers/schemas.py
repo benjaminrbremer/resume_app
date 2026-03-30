@@ -2,7 +2,25 @@
 Pydantic request and response models for all API routes.
 """
 
-from pydantic import BaseModel
+import re
+from datetime import date
+
+from pydantic import BaseModel, field_validator, model_validator
+
+_DATE_RE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
+
+
+def _validate_dates(start_date: str | None, end_date: str | None) -> None:
+    today = date.today().strftime("%Y-%m")
+    if start_date and start_date > today:
+        raise ValueError("start_date cannot be in the future")
+    if end_date:
+        if end_date > today:
+            raise ValueError("end_date cannot be in the future")
+        if not start_date:
+            raise ValueError("start_date is required when end_date is set")
+        if start_date > end_date:
+            raise ValueError("end_date must be on or after start_date")
 
 
 # ---------------------------------------------------------------------------
@@ -37,10 +55,23 @@ class LoginResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 class ExperienceCreate(BaseModel):
-    type: str  # general | job_project | personal
+    type: str  # general | job | project | volunteer
     title: str
     start_date: str | None = None
     end_date: str | None = None
+    content: str | None = None
+
+    @field_validator("start_date", "end_date", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v: object) -> object:
+        if v == "":
+            return None
+        return v
+
+    @model_validator(mode="after")
+    def validate_dates(self) -> "ExperienceCreate":
+        _validate_dates(self.start_date, self.end_date)
+        return self
 
 
 class ExperienceUpdate(BaseModel):
@@ -48,6 +79,19 @@ class ExperienceUpdate(BaseModel):
     title: str | None = None
     start_date: str | None = None
     end_date: str | None = None
+    content: str | None = None
+
+    @field_validator("start_date", "end_date", mode="before")
+    @classmethod
+    def empty_str_to_none(cls, v: object) -> object:
+        if v == "":
+            return None
+        return v
+
+    @model_validator(mode="after")
+    def validate_dates(self) -> "ExperienceUpdate":
+        _validate_dates(self.start_date, self.end_date)
+        return self
 
 
 # ---------------------------------------------------------------------------
@@ -57,11 +101,13 @@ class ExperienceUpdate(BaseModel):
 class SkillCreate(BaseModel):
     name: str
     proficiency: str | None = None
+    content: str | None = None
 
 
 class SkillUpdate(BaseModel):
     name: str | None = None
     proficiency: str | None = None
+    content: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -115,3 +161,7 @@ class GenerateDocumentRequest(BaseModel):
 class UploadExampleRequest(BaseModel):
     username: str
     filename: str
+
+
+class ExampleDocumentUpdate(BaseModel):
+    document_type: str | None = None  # resume | cover_letter | other

@@ -179,14 +179,29 @@ def write_application_file(username: str, app_id: str, filename: str, content: s
 # Example document operations
 # ---------------------------------------------------------------------------
 
-def save_example_document(username: str, filename: str, data: bytes) -> None:
-    """Save an uploaded example document (PDF bytes) to the example_documents directory."""
-    dest = _example_docs_dir(username) / filename
+def save_example_document(username: str, doc_id: str, data: bytes) -> None:
+    """Save an uploaded example document to the example_documents directory, keyed by doc_id."""
+    dest = _example_docs_dir(username) / doc_id
     dest.write_bytes(data)
 
 
+def read_example_document(username: str, doc_id: str) -> bytes:
+    """Return the raw bytes of an example document. Returns empty bytes if not found."""
+    path = _example_docs_dir(username) / doc_id
+    if not path.exists():
+        return b""
+    return path.read_bytes()
+
+
+def delete_example_document(username: str, doc_id: str) -> None:
+    """Delete an example document file. No-op if the file does not exist."""
+    path = _example_docs_dir(username) / doc_id
+    if path.exists():
+        path.unlink()
+
+
 def list_example_documents(username: str) -> list[str]:
-    """Return filenames of all uploaded example documents for a user."""
+    """Return doc_ids of all uploaded example documents for a user."""
     docs_dir = _example_docs_dir(username)
     if not docs_dir.exists():
         return []
