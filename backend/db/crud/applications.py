@@ -39,7 +39,7 @@ def get_applications_for_user(username: str) -> list[dict]:
 
 
 def update_application(app_id: str, **fields) -> dict | None:
-    allowed = {"title", "company", "outcome", "submitted_dt", "outcome_dt"}
+    allowed = {"title", "company", "website_url", "outcome", "submitted_dt", "outcome_dt"}
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return get_application(app_id)

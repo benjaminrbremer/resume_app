@@ -7,6 +7,7 @@ from backend.file_db.operations import (
     read_experience_file,
     write_experience_file,
 )
+from backend.llm.embeddings import try_generate_summary_and_embedding
 from backend.routers.schemas import SkillCreate, SkillUpdate
 
 router = APIRouter()
@@ -25,9 +26,15 @@ async def create_skill(body: SkillCreate, username: str):
         name=body.name,
         proficiency=body.proficiency,
     )
+    content = body.content or ""
     if body.content is not None:
         write_experience_file(username, record["id"], body.content)
-    return JSONResponse(status_code=201, content=record)
+    proficiency_str = f" ({record['proficiency']})" if record.get("proficiency") else ""
+    label = f"skill: {record['name']}{proficiency_str}"
+    summary, embedding = try_generate_summary_and_embedding(label, content)
+    if summary is not None:
+        crud.update_skill(record["id"], summary=summary, embedding=embedding)
+    return JSONResponse(status_code=201, content=crud.get_skill(record["id"]))
 
 
 @router.get("/{skill_id}")
@@ -46,7 +53,13 @@ async def update_skill(skill_id: str, body: SkillUpdate):
         raise HTTPException(status_code=404, detail="Skill not found")
     if body.content is not None:
         write_experience_file(record["username"], skill_id, body.content)
-    return JSONResponse(content=record)
+    content = body.content if body.content is not None else read_experience_file(record["username"], skill_id)
+    proficiency_str = f" ({record['proficiency']})" if record.get("proficiency") else ""
+    label = f"skill: {record['name']}{proficiency_str}"
+    summary, embedding = try_generate_summary_and_embedding(label, content)
+    if summary is not None:
+        crud.update_skill(skill_id, summary=summary, embedding=embedding)
+    return JSONResponse(content=crud.get_skill(skill_id))
 
 
 @router.delete("/{skill_id}")

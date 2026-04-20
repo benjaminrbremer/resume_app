@@ -38,7 +38,7 @@ def get_jobs_for_user(username: str) -> list[dict]:
 
 
 def update_job(job_id: str, **fields) -> dict | None:
-    allowed = {"title", "company", "start_date", "end_date"}
+    allowed = {"title", "company", "start_date", "end_date", "summary", "embedding"}
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return get_job(job_id)
