@@ -119,6 +119,7 @@ class JobCreate(BaseModel):
     company: str
     start_date: str | None = None
     end_date: str | None = None
+    content: str | None = None
 
 
 class JobUpdate(BaseModel):
@@ -126,6 +127,7 @@ class JobUpdate(BaseModel):
     company: str | None = None
     start_date: str | None = None
     end_date: str | None = None
+    content: str | None = None
 
 
 # ---------------------------------------------------------------------------

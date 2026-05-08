@@ -17,8 +17,7 @@ import {
   updateExperience,
   updateSkill,
 } from "@/lib/api";
-
-const USERNAME = "alice"; // temporary until session auth is implemented
+import { useUsername } from "@/hooks/useUsername";
 
 const TYPE_BADGE: Record<string, string> = {
   general: "bg-gray-100 text-gray-700",
@@ -61,6 +60,7 @@ const TAB_LABELS: Record<Tab, string> = {
 };
 
 export default function ExperiencePage() {
+  const username = useUsername();
   const [activeTab, setActiveTab] = useState<Tab>("jobs");
 
   // List data
@@ -88,25 +88,28 @@ export default function ExperiencePage() {
   const [skillContent, setSkillContent] = useState("");
 
   async function loadExperiences() {
+    if (!username) return;
     try {
-      setExperiences(await listExperience(USERNAME));
+      setExperiences(await listExperience(username));
     } catch {
       // silently fail
     }
   }
 
   async function loadSkills() {
+    if (!username) return;
     try {
-      setSkills(await listSkills(USERNAME));
+      setSkills(await listSkills(username));
     } catch {
       // silently fail
     }
   }
 
   useEffect(() => {
+    if (!username) return;
     loadExperiences();
     loadSkills();
-  }, []);
+  }, [username]);
 
   function handleTabChange(tab: Tab) {
     setActiveTab(tab);
@@ -206,7 +209,7 @@ export default function ExperiencePage() {
     };
     try {
       if (formMode === "new") {
-        await createExperience(USERNAME, payload);
+        await createExperience(username!, payload);
       } else if (selectedId) {
         await updateExperience(selectedId, payload);
       }
@@ -270,7 +273,7 @@ export default function ExperiencePage() {
     };
     try {
       if (formMode === "new") {
-        await createSkill(USERNAME, payload);
+        await createSkill(username!, payload);
       } else if (selectedId) {
         await updateSkill(selectedId, payload);
       }
@@ -312,6 +315,8 @@ export default function ExperiencePage() {
       : formMode === "editing"
       ? `Edit ${TAB_LABELS[activeTab].replace(/s$/, "")}`
       : `${TAB_LABELS[activeTab].replace(/s$/, "")} Editor`;
+
+  if (!username) return null;
 
   return (
     <div className="flex h-[calc(100vh-8rem)] gap-4">

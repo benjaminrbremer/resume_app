@@ -14,7 +14,7 @@ The agent is responsible for:
 import json
 import logging
 
-from backend.llm.client import VLLMClient
+from backend.llm.client import LLMClient
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +144,7 @@ def run_agent(username: str, application_id: str, user_message: str) -> str:
     from backend.db.crud.applications import add_chat_message, get_chat_messages
 
     registry = _build_tool_registry()
-    client = VLLMClient()
+    client = LLMClient()
 
     history = get_chat_messages(application_id)
     messages = [{"role": msg["role"], "content": msg["content"]} for msg in history]

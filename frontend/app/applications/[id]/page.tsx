@@ -11,8 +11,7 @@ import {
   type ApplicationExperienceResponse,
   type ExperienceItemWithSelection,
 } from "@/lib/api";
-
-const USERNAME = "alice";
+import { useUsername } from "@/hooks/useUsername";
 
 type DocTab = "resume" | "cover_letter";
 type ActionStatus = "idle" | "saving" | "done" | "error";
@@ -102,6 +101,7 @@ export default function ApplicationDetailPage({
   params: { id: string };
 }) {
   const router = useRouter();
+  const username = useUsername();
   const appId = params.id;
 
   const [app, setApp] = useState<ApplicationRecordWithJobInfo | null>(null);
@@ -176,7 +176,7 @@ export default function ApplicationDetailPage({
     setActionError(null);
     try {
       const result = await saveAndGenerate(appId, {
-        username: USERNAME,
+        username: username!,
         selected_experience_ids: Array.from(selectedIds),
         changes_prompt: changesPrompt.trim() || undefined,
         generate_resume: genResume,
@@ -212,6 +212,8 @@ export default function ApplicationDetailPage({
     : genResume || genCoverLetter
     ? "Save & Generate"
     : "Save Changes";
+
+  if (!username) return null;
 
   if (loadError) {
     return (

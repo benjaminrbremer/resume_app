@@ -1,5 +1,5 @@
 """
-HTTP client for the vLLM OpenAI-compatible inference server.
+HTTP client for the Ollama OpenAI-compatible inference server.
 """
 
 import os
@@ -9,29 +9,29 @@ import httpx
 
 
 @dataclass
-class VLLMClient:
+class LLMClient:
     """
-    Thin wrapper around the vLLM /v1/chat/completions endpoint.
+    Thin wrapper around the Ollama /v1/chat/completions endpoint.
 
     Configure via environment variables:
-        VLLM_BASE_URL        — base URL of the running vLLM server (default: http://localhost:8000)
-        VLLM_MODEL_NAME      — chat model identifier
-        VLLM_EMBED_MODEL_NAME — embedding model identifier (default: nomic-embed-text)
+        OLLAMA_BASE_URL        — base URL of the running Ollama server (default: http://localhost:11434)
+        OLLAMA_MODEL_NAME      — chat model identifier (default: qwen2.5:34b)
+        OLLAMA_EMBED_MODEL_NAME — embedding model identifier (default: nomic-embed-text)
     """
 
     base_url: str = field(
-        default_factory=lambda: os.getenv("VLLM_BASE_URL", "http://localhost:8000")
+        default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     )
     model_name: str = field(
-        default_factory=lambda: os.getenv("VLLM_MODEL_NAME", "default")
+        default_factory=lambda: os.getenv("OLLAMA_MODEL_NAME", "qwen2.5:34b")
     )
     embed_model_name: str = field(
-        default_factory=lambda: os.getenv("VLLM_EMBED_MODEL_NAME", "nomic-embed-text")
+        default_factory=lambda: os.getenv("OLLAMA_EMBED_MODEL_NAME", "mxbai-embed-large")
     )
 
     def chat(self, messages: list[dict], tools: list[dict] | None = None) -> dict:
         """
-        Send a chat completion request to the vLLM server.
+        Send a chat completion request to the Ollama server.
 
         POSTs to {base_url}/v1/chat/completions using the OpenAI request format.
         If tools are provided, they are included in the request so the model
@@ -43,7 +43,7 @@ class VLLMClient:
                    parameters schema). Pass None for a plain chat completion.
 
         Returns:
-            The parsed JSON response dict from the vLLM endpoint
+            The parsed JSON response dict from the Ollama endpoint
             (contains 'choices', 'usage', etc.).
 
         Raises:
@@ -90,3 +90,7 @@ class VLLMClient:
         )
         response.raise_for_status()
         return response.json()["data"][0]["embedding"]
+
+
+# Backwards-compatible alias
+VLLMClient = LLMClient

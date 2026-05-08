@@ -3,21 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { listApplications, type ApplicationRecord } from "@/lib/api";
-
-const USERNAME = "alice";
+import { useUsername } from "@/hooks/useUsername";
 
 export default function ApplicationsPage() {
   const router = useRouter();
+  const username = useUsername();
   const [applications, setApplications] = useState<ApplicationRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    listApplications(USERNAME)
+    if (!username) return;
+    listApplications(username)
       .then(setApplications)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [username]);
+
+  if (!username) return null;
 
   return (
     <div>

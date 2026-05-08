@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createApplication } from "@/lib/api";
-
-const USERNAME = "alice";
+import { useUsername } from "@/hooks/useUsername";
 
 export default function NewApplicationPage() {
   const router = useRouter();
+  const username = useUsername();
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -32,7 +32,7 @@ export default function NewApplicationPage() {
     setSaving(true);
     setError(null);
     try {
-      const app = await createApplication(USERNAME, {
+      const app = await createApplication(username!, {
         title: form.title.trim(),
         company: form.company.trim(),
         website_url: form.website_url.trim() || undefined,
@@ -46,6 +46,8 @@ export default function NewApplicationPage() {
       setSaving(false);
     }
   }
+
+  if (!username) return null;
 
   return (
     <div className="mx-auto max-w-2xl">
