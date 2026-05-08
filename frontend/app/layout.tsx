@@ -27,6 +27,12 @@ export default function RootLayout({
                 Experience
               </a>
               <a
+                href="/example-documents"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900"
+              >
+                Documents
+              </a>
+              <a
                 href="/applications"
                 className="text-sm font-medium text-gray-600 hover:text-gray-900"
               >

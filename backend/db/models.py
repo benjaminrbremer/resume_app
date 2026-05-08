@@ -34,7 +34,7 @@ CREATE_EXPERIENCE = """
 CREATE TABLE IF NOT EXISTS experience (
     id          TEXT    PRIMARY KEY,
     username    TEXT    NOT NULL REFERENCES users(username) ON DELETE CASCADE,
-    type        TEXT    NOT NULL CHECK(type IN ('general', 'job_project', 'personal')),
+    type        TEXT    NOT NULL CHECK(type IN ('general', 'job', 'project', 'volunteer')),
     title       TEXT    NOT NULL,
     start_date  TEXT,
     end_date    TEXT
@@ -99,6 +99,17 @@ CREATE TABLE IF NOT EXISTS job_skills (
 );
 """
 
+CREATE_EXAMPLE_DOCUMENTS = """
+CREATE TABLE IF NOT EXISTS example_documents (
+    id                TEXT    PRIMARY KEY,
+    username          TEXT    NOT NULL REFERENCES users(username) ON DELETE CASCADE,
+    original_filename TEXT    NOT NULL,
+    content_type      TEXT,
+    document_type     TEXT    CHECK(document_type IN ('resume', 'cover_letter', 'other')),
+    created_dt        TEXT    DEFAULT (datetime('now'))
+);
+"""
+
 # Ordered for FK dependency resolution
 ALL_TABLES = [
     CREATE_USERS,
@@ -110,4 +121,5 @@ ALL_TABLES = [
     CREATE_JOB_EXPERIENCE,
     CREATE_EXPERIENCE_SKILLS,
     CREATE_JOB_SKILLS,
+    CREATE_EXAMPLE_DOCUMENTS,
 ]

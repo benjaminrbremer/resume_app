@@ -1,21 +1,19 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-# Uncomment and configure when the frontend is wired up:
-# from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from backend.routers import auth, experience, skills, jobs, applications, documents
 
 app = FastAPI(title="Resume App", version="0.1.0")
 
-# CORS — enable once the Next.js frontend starts making requests:
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:3000"],
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(experience.router, prefix="/experience", tags=["experience"])
