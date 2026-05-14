@@ -119,6 +119,7 @@ class JobCreate(BaseModel):
     company: str
     start_date: str | None = None
     end_date: str | None = None
+    content: str | None = None
 
 
 class JobUpdate(BaseModel):
@@ -126,6 +127,7 @@ class JobUpdate(BaseModel):
     company: str | None = None
     start_date: str | None = None
     end_date: str | None = None
+    content: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -135,11 +137,17 @@ class JobUpdate(BaseModel):
 class ApplicationCreate(BaseModel):
     title: str
     company: str
+    job_description: str | None = None
+    website_url: str | None = None
+    generate_resume: bool = False
+    generate_cover_letter: bool = False
 
 
 class ApplicationUpdate(BaseModel):
     title: str | None = None
     company: str | None = None
+    job_description: str | None = None
+    website_url: str | None = None
     outcome: str | None = None
     submitted_dt: str | None = None
     outcome_dt: str | None = None
@@ -152,6 +160,18 @@ class ChatMessageRequest(BaseModel):
 
 class GenerateDocumentRequest(BaseModel):
     username: str  # temporary until session auth is implemented
+
+
+class SaveAndGenerateRequest(BaseModel):
+    username: str
+    selected_experience_ids: list[str]
+    changes_prompt: str | None = None
+    generate_resume: bool = False
+    generate_cover_letter: bool = False
+    title: str | None = None
+    company: str | None = None
+    website_url: str | None = None
+    job_description: str | None = None
 
 
 # ---------------------------------------------------------------------------

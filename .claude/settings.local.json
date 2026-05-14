@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p C:/Users/Benjamin/Documents/repos/resume_app/frontend/hooks)",
+      "Bash(mkdir -p C:/Users/Benjamin/Documents/repos/resume_app/frontend/components)"
+    ]
+  }
+}

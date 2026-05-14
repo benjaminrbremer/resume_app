@@ -42,7 +42,7 @@ def get_experience_for_user(username: str) -> list[dict]:
 
 
 def update_experience(exp_id: str, **fields) -> dict | None:
-    allowed = {"type", "title", "start_date", "end_date"}
+    allowed = {"type", "title", "start_date", "end_date", "summary", "embedding"}
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return get_experience(exp_id)

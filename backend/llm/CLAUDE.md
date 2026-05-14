@@ -2,9 +2,9 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## VLLMClient
+## LLMClient
 
-Expects an OpenAI-compatible `/v1/chat/completions` endpoint. The `tools` parameter maps to OpenAI's function-calling format. Use `httpx` (already in requirements) for the HTTP call — not `requests`.
+Expects an OpenAI-compatible `/v1/chat/completions` endpoint (Ollama). The `tools` parameter maps to OpenAI's function-calling format. Use `httpx` (already in requirements) for the HTTP call — not `requests`.
 
 ## Tool registry
 
@@ -17,7 +17,7 @@ Expects an OpenAI-compatible `/v1/chat/completions` endpoint. The `tools` parame
 Expected flow:
 1. `crud/applications.get_chat_messages(application_id)` → load history
 2. Append `{"role": "user", "content": user_message}`
-3. `VLLMClient.chat(messages, tools=list(_build_tool_registry().values()))` — send to LLM
+3. `LLMClient.chat(messages, tools=list(_build_tool_registry().values()))` — send to LLM
 4. If response has `tool_calls`: dispatch each, append `{"role": "tool", ...}` results, go to step 3
 5. On plain text response: `crud/applications.add_chat_message(application_id, "assistant", content)`, return content
 

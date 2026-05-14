@@ -9,8 +9,7 @@ import {
   updateExampleDocument,
   uploadExampleDocument,
 } from "@/lib/api";
-
-const USERNAME = "alice"; // temporary until session auth is implemented
+import { useUsername } from "@/hooks/useUsername";
 
 const DOC_TYPE_LABEL: Record<string, string> = {
   resume: "Resume",
@@ -33,6 +32,7 @@ function formatDate(dt: string): string {
 }
 
 export default function ExampleDocumentsPage() {
+  const username = useUsername();
   const [docs, setDocs] = useState<ExampleDocumentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -44,14 +44,15 @@ export default function ExampleDocumentsPage() {
   const selected = docs.find((d) => d.id === selectedId) ?? null;
 
   useEffect(() => {
-    listExampleDocuments(USERNAME)
+    if (!username) return;
+    listExampleDocuments(username)
       .then((records) => {
         setDocs(records);
         if (records.length > 0) setSelectedId(records[0].id);
       })
       .catch((e) => setError(e.message))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [username]);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -59,7 +60,7 @@ export default function ExampleDocumentsPage() {
     setUploadError(null);
     setIsUploading(true);
     try {
-      const record = await uploadExampleDocument(USERNAME, file);
+      const record = await uploadExampleDocument(username!, file);
       setDocs((prev) => [record, ...prev]);
       setSelectedId(record.id);
     } catch (e: unknown) {
@@ -91,6 +92,8 @@ export default function ExampleDocumentsPage() {
       setError(e instanceof Error ? e.message : "Delete failed");
     }
   }
+
+  if (!username) return null;
 
   return (
     <div className="flex h-[calc(100vh-8rem)] gap-4">

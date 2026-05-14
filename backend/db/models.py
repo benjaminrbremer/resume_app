@@ -26,7 +26,9 @@ CREATE TABLE IF NOT EXISTS skills (
     id          TEXT    PRIMARY KEY,
     username    TEXT    NOT NULL REFERENCES users(username) ON DELETE CASCADE,
     name        TEXT    NOT NULL,
-    proficiency TEXT
+    proficiency TEXT,
+    summary     TEXT,
+    embedding   TEXT
 );
 """
 
@@ -37,7 +39,9 @@ CREATE TABLE IF NOT EXISTS experience (
     type        TEXT    NOT NULL CHECK(type IN ('general', 'job', 'project', 'volunteer')),
     title       TEXT    NOT NULL,
     start_date  TEXT,
-    end_date    TEXT
+    end_date    TEXT,
+    summary     TEXT,
+    embedding   TEXT
 );
 """
 
@@ -48,7 +52,9 @@ CREATE TABLE IF NOT EXISTS jobs (
     title       TEXT    NOT NULL,
     company     TEXT    NOT NULL,
     start_date  TEXT,
-    end_date    TEXT
+    end_date    TEXT,
+    summary     TEXT,
+    embedding   TEXT
 );
 """
 
@@ -58,6 +64,7 @@ CREATE TABLE IF NOT EXISTS applications (
     username     TEXT    NOT NULL REFERENCES users(username) ON DELETE CASCADE,
     title        TEXT    NOT NULL,
     company      TEXT    NOT NULL,
+    website_url  TEXT,
     outcome      TEXT,
     started_dt   TEXT    DEFAULT (datetime('now')),
     submitted_dt TEXT,

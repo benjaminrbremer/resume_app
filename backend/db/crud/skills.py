@@ -30,7 +30,7 @@ def get_skills_for_user(username: str) -> list[dict]:
 
 
 def update_skill(skill_id: str, **fields) -> dict | None:
-    allowed = {"name", "proficiency"}
+    allowed = {"name", "proficiency", "summary", "embedding"}
     updates = {k: v for k, v in fields.items() if k in allowed}
     if not updates:
         return get_skill(skill_id)

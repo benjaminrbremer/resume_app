@@ -7,6 +7,7 @@ from backend.file_db.operations import (
     read_experience_file,
     write_experience_file,
 )
+from backend.llm.embeddings import try_generate_summary_and_embedding
 from backend.routers.schemas import ExperienceCreate, ExperienceUpdate
 
 router = APIRouter()
@@ -27,9 +28,14 @@ async def create_experience(body: ExperienceCreate, username: str):
         start_date=body.start_date,
         end_date=body.end_date,
     )
+    content = body.content or ""
     if body.content is not None:
         write_experience_file(username, record["id"], body.content)
-    return JSONResponse(status_code=201, content=record)
+    label = f"{record['type']}: {record['title']}"
+    summary, embedding = try_generate_summary_and_embedding(label, content)
+    if summary is not None:
+        crud.update_experience(record["id"], summary=summary, embedding=embedding)
+    return JSONResponse(status_code=201, content=crud.get_experience(record["id"]))
 
 
 @router.get("/{exp_id}")
@@ -48,7 +54,12 @@ async def update_experience(exp_id: str, body: ExperienceUpdate):
         raise HTTPException(status_code=404, detail="Experience not found")
     if body.content is not None:
         write_experience_file(record["username"], exp_id, body.content)
-    return JSONResponse(content=record)
+    content = body.content if body.content is not None else read_experience_file(record["username"], exp_id)
+    label = f"{record['type']}: {record['title']}"
+    summary, embedding = try_generate_summary_and_embedding(label, content)
+    if summary is not None:
+        crud.update_experience(exp_id, summary=summary, embedding=embedding)
+    return JSONResponse(content=crud.get_experience(exp_id))
 
 
 @router.delete("/{exp_id}")

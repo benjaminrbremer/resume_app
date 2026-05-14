@@ -28,14 +28,24 @@ def init_db() -> None:
             print(f"  OK  {table_name}")
 
     # Migrations: add columns that may not exist in older DBs
+    _migrations = [
+        ("example_documents", "document_type",
+         "ALTER TABLE example_documents ADD COLUMN document_type TEXT "
+         "CHECK(document_type IN ('resume', 'cover_letter', 'other'))"),
+        ("experience", "summary",   "ALTER TABLE experience ADD COLUMN summary TEXT"),
+        ("experience", "embedding", "ALTER TABLE experience ADD COLUMN embedding TEXT"),
+        ("skills",     "summary",   "ALTER TABLE skills ADD COLUMN summary TEXT"),
+        ("skills",     "embedding", "ALTER TABLE skills ADD COLUMN embedding TEXT"),
+        ("jobs",       "summary",   "ALTER TABLE jobs ADD COLUMN summary TEXT"),
+        ("jobs",       "embedding", "ALTER TABLE jobs ADD COLUMN embedding TEXT"),
+        ("applications", "website_url", "ALTER TABLE applications ADD COLUMN website_url TEXT"),
+    ]
     with get_db_connection() as conn:
-        cols = {row[1] for row in conn.execute("PRAGMA table_info(example_documents)").fetchall()}
-        if "document_type" not in cols:
-            conn.execute(
-                "ALTER TABLE example_documents ADD COLUMN document_type TEXT "
-                "CHECK(document_type IN ('resume', 'cover_letter', 'other'))"
-            )
-            print("  MIG example_documents.document_type")
+        for table, col, ddl in _migrations:
+            existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+            if col not in existing:
+                conn.execute(ddl)
+                print(f"  MIG {table}.{col}")
 
     print(f"\nInitializing file DB root at: {FILE_DB_PATH}")
     FILE_DB_PATH.mkdir(parents=True, exist_ok=True)
